@@ -1,9 +1,4 @@
-import 'package:expense_tracker/model/expense.dart';
 import 'package:expense_tracker/model/expense_provider.dart';
-import 'package:expense_tracker/screens/signUp_screen.dart';
-import 'package:expense_tracker/screens/signin_screen.dart';
-import 'package:string_scanner/string_scanner.dart';
-import 'package:expense_tracker/screens/skeleton_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'utils/route.dart';
