@@ -1,13 +1,34 @@
+import 'package:expense_tracker/screens/skeleton_screen.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/services/api_service.dart';
 
 class SignupScreen extends StatelessWidget {
   //input controllers
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-  final userNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _nameController = TextEditingController();
+
+  final ApiService apiService = ApiService();
+
+  void signup(BuildContext context) async {
+    final result = await apiService.signup(
+      _nameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (result["success"]) {
+      // Navigate to home page
+      Navigator.pushNamed(context, AppRoutes.skeleton);
+    } else {
+      print("ERROR!!!!");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Signup failed. Please try again.")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,26 +84,6 @@ class SignupScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    // const SizedBox(height: 30,),
-                    //app logo
-                    // Center(
-                    //   child: Container(
-                    //     height: 60,
-                    //     width: 60,
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.green,
-                    //       border: Border.all(color: Colors.greenAccent,width: 2),
-                    //       borderRadius: BorderRadius.circular(30),
-                    //     ),
-                    //     child: Center(
-                    //       child: Text("\$",style: TextStyle(
-                    //         fontSize: 28,
-                    //         fontWeight: FontWeight.bold,
-                    //         color: Colors.white,
-                    //       ),),
-                    //     ),
-                    //   ),
-                    // ),
                     const SizedBox(height: 40),
                     //sign in text
                     const Text(
@@ -95,7 +96,7 @@ class SignupScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 30),
                     TextFormField(
-                      controller: userNameController,
+                      controller: _nameController,
                       decoration: InputDecoration(
                         labelText: "Name",
                         hintText: "ex: akii",
@@ -112,7 +113,7 @@ class SignupScreen extends StatelessWidget {
                     SizedBox(height: 16),
 
                     TextFormField(
-                      controller: emailController,
+                      controller: _emailController,
                       decoration: InputDecoration(
                         labelText: "Email",
                         hintText: "ex: akii@gmail.com",
@@ -128,7 +129,7 @@ class SignupScreen extends StatelessWidget {
                     SizedBox(height: 16),
                     TextFormField(
                       obscureText: true,
-                      controller: passwordController,
+                      controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: "Password",
                         border: OutlineInputBorder(
@@ -143,7 +144,7 @@ class SignupScreen extends StatelessWidget {
                     SizedBox(height: 16),
                     TextFormField(
                       obscureText: true,
-                      controller: confirmPasswordController,
+                      controller: _confirmPasswordController,
                       decoration: InputDecoration(
                         labelText: "Confirm Password",
                         border: OutlineInputBorder(
@@ -162,37 +163,17 @@ class SignupScreen extends StatelessWidget {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: () async {
-                          if (passwordController.text !=
-                              confirmPasswordController.text) {
+                        onPressed: () {
+                          if (_passwordController.text !=
+                              _confirmPasswordController.text) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text("Passwords do not match"),
                               ),
                             );
                             return;
-                          }
-                          final result = await ApiService().signup(
-                            userNameController.text,
-                            emailController.text,
-                            passwordController.text,
-                          );
-
-                          if (result["status"] == 200) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Signup successful"),
-                              ),
-                            );
-                            Navigator.pushNamed(context, AppRoutes.signin);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "Error: ${result["body"]["error"] ?? "Failed"}",
-                                ),
-                              ),
-                            );
+                            signup(context);
                           }
                         },
                         style: ElevatedButton.styleFrom(

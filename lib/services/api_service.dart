@@ -1,85 +1,43 @@
-// import 'dart:convert';
-// import 'package:http/http.dart' as http;
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-// class ApiService {
-//   final String baseUrl = "http://192.168.1.10:4000"; // replace with your IP
-//   final storage = const FlutterSecureStorage();
-
-//   // Signup
-//   Future<Map<String, dynamic>> signup(String name, String email, String password) async {
-//     final response = await http.post(
-//       Uri.parse("$baseUrl/auth/signup"),
-//       headers: {"Content-Type": "application/json"},
-//       body: jsonEncode({"name": name, "email": email, "password": password}),
-//     );
-//     return jsonDecode(response.body);
-//   }
-
-//   // Login
-//   Future<bool> login(String email, String password) async {
-//     final response = await http.post(
-//       Uri.parse("$baseUrl/auth/login"),
-//       headers: {"Content-Type": "application/json"},
-//       body: jsonEncode({"email": email, "password": password}),
-//     );
-
-//     if (response.statusCode == 200) {
-//       final data = jsonDecode(response.body);
-//       await storage.write(key: "token", value: data["token"]);
-//       return true;
-//     }
-//     return false;
-//   }
-
-//   // Fetch Expenses
-//   Future<List<dynamic>> getExpenses() async {
-//     final token = await storage.read(key: "token");
-//     final response = await http.get(
-//       Uri.parse("$baseUrl/expenses"),
-//       headers: {"Authorization": "Bearer $token"},
-//     );
-//     return jsonDecode(response.body);
-//   }
-
-//   // Add Expense
-//   Future<Map<String, dynamic>> addExpense(String title, double amount, String category, String date, {String? note}) async {
-//     final token = await storage.read(key: "token");
-//     final response = await http.post(
-//       Uri.parse("$baseUrl/expenses"),
-//       headers: {
-//         "Authorization": "Bearer $token",
-//         "Content-Type": "application/json"
-//       },
-//       body: jsonEncode({
-//         "title": title,
-//         "amount": amount,
-//         "category": category,
-//         "date": date,
-//         "note": note
-//       }),
-//     );
-//     return jsonDecode(response.body);
-//   }
-// }
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final String baseUrl = "http://192.168.1.7/";
+  final String baseUrl = "http://192.168.1.7/api/auth"; // Android Emulator
+  // use http://localhost:4000 if running on web
+  // or replace with your machine IP if testing on real device
 
   Future<Map<String, dynamic>> signup(
     String name,
     String email,
     String password,
   ) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/auth/signup"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"name": name, "email": email, "password": password}),
-    );
+    final url = Uri.parse("$baseUrl/signup");
 
-    return {"status": response.statusCode, "body": jsonDecode(response.body)};
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"name": name, "email": email, "password": password}),
+      );
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+
+        // Save token locally
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", data["token"]);
+
+        return {"success": true, "user": data["user"], "token": data["token"]};
+      } else {
+        final error = jsonDecode(response.body);
+        return {
+          "success": false,
+          "message": error["message"] ?? "Signup failed",
+        };
+      }
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 }

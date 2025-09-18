@@ -1,27 +1,21 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { PrismaClient } from '@prisma/client'
-
-
-
 dotenv.config();
-const app = express();
-const prisma = new PrismaClient();
 
+import authRoutes from "./routes/auth.js"; 
+
+const app = express();
 app.use(cors());
 app.use(express.json());
 
+//routes
 app.get("/", (req, res) => {
   res.send("Expense Tracker Backend Running ✅");
 });
 
+app.use("/api/auth",authRoutes);
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 
-//auth inserted
-import authRoutes from "./routes/auth.js";
-app.use("/auth", authRoutes);
-//CRUD
-import expenseRoutes from "./routes/expenses.js";
-app.use("/expenses", expenseRoutes);
