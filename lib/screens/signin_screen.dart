@@ -1,4 +1,3 @@
-import 'package:expense_tracker/services/api_service.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
 
@@ -12,25 +11,6 @@ class _SigninScreenState extends State<SigninScreen> {
   final emailController = TextEditingController();
 
   final passwordController = TextEditingController();
-  //api
-  final ApiService api = ApiService();
-
-  // void _login() async {
-  //   final success = await api.login(
-  //     emailController.text,
-  //     passwordController.text,
-  //   );
-  //   if (success) {
-  //     ScaffoldMessenger.of(
-  //       context,
-  //     ).showSnackBar(const SnackBar(content: Text("Login Successful ✅")));
-  //     // Navigate to home screen
-  //   } else {
-  //     ScaffoldMessenger.of(
-  //       context,
-  //     ).showSnackBar(const SnackBar(content: Text("Login Failed ❌")));
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -86,26 +66,6 @@ class _SigninScreenState extends State<SigninScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    // const SizedBox(height: 30,),
-                    //app logo
-                    // Center(
-                    //   child: Container(
-                    //     height: 60,
-                    //     width: 60,
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.green,
-                    //       border: Border.all(color: Colors.greenAccent,width: 2),
-                    //       borderRadius: BorderRadius.circular(30),
-                    //     ),
-                    //     child: Center(
-                    //       child: Text("\$",style: TextStyle(
-                    //         fontSize: 28,
-                    //         fontWeight: FontWeight.bold,
-                    //         color: Colors.white,
-                    //       ),),
-                    //     ),
-                    //   ),
-                    // ),
                     const SizedBox(height: 40),
                     //sign in text
                     const Text(
@@ -153,10 +113,7 @@ class _SigninScreenState extends State<SigninScreen> {
                       height: 48,
                       child: ElevatedButton(
                         onPressed: () {
-                          //authenticae then
                           //sign in
-                          // _login();
-                          // Navigator.pushNamed(context, AppRoutes.skeleton);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,

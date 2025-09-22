@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:expense_tracker/screens/skeleton_screen.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/services/api_service.dart';
+
+import 'package:http/http.dart' as http;
 
 class SignupScreen extends StatelessWidget {
   //input controllers
@@ -10,22 +13,30 @@ class SignupScreen extends StatelessWidget {
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
 
-  final ApiService apiService = ApiService();
+  //*******signup function****
+  Future<void> _signup(BuildContext context) async {
+    final url = Uri.parse("http://localhost:4000/signup");
 
-  void signup(BuildContext context) async {
-    final result = await apiService.signup(
-      _nameController.text.trim(),
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "username": _nameController.text,
+        "email": _emailController.text,
+        "password": _passwordController.text,
+      }),
     );
 
-    if (result["success"]) {
-      // Navigate to home page
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("signup success!")));
+
+      //navigate to homescreen
       Navigator.pushNamed(context, AppRoutes.skeleton);
     } else {
-      print("ERROR!!!!");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Signup failed. Please try again.")),
+        SnackBar(content: Text("Error: not able to signup${response.body}")),
       );
     }
   }
@@ -173,7 +184,8 @@ class SignupScreen extends StatelessWidget {
                             );
                             return;
                           } else {
-                            signup(context);
+                            //signup function -> call backend
+                            _signup(context);
                           }
                         },
                         style: ElevatedButton.styleFrom(
