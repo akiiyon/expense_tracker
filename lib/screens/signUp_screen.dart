@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:expense_tracker/screens/skeleton_screen.dart';
+import 'package:expense_tracker/utils/api_service.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
 
@@ -13,18 +14,14 @@ class SignupScreen extends StatelessWidget {
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
 
-  //*******signup function****
-  Future<void> _signup(BuildContext context) async {
-    final url = Uri.parse("http://localhost:4000/signup");
+  final api = ApiService();
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "username": _nameController.text,
-        "email": _emailController.text,
-        "password": _passwordController.text,
-      }),
+  //*******signup function****
+  Future<void> handleSignup(BuildContext context) async {
+    final response = await api.signup(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
     );
 
     if (response.statusCode == 201) {
@@ -185,7 +182,7 @@ class SignupScreen extends StatelessWidget {
                             return;
                           } else {
                             //signup function -> call backend
-                            _signup(context);
+                            handleSignup(context);
                           }
                         },
                         style: ElevatedButton.styleFrom(

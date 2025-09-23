@@ -1,16 +1,22 @@
 const express=require("express")
 const bodyParser=require("body-parser")
 const cors=require("cors")
+//adding postgres
+const {Pool}=require("pg")
 
 const app=express()
 
 app.use(bodyParser.json())
 app.use(cors())
 
-
-//temporary users
-let users=[]
-
+//CONNECT TO POSTGRES
+const pool = new Pool({
+  user: "postgres",     //postgres username
+  host: "localhost",
+  database: "expense_tracker_db",   //DB name
+  password: "7854",
+  port: 3000,     //postgres PORT -> default is 5432,i used 3000
+})
 
 //default route
 app.get("/",(req,res)=>{
@@ -24,19 +30,30 @@ app.get("/",(req,res)=>{
 })
 
 //signup route
-app.post("/signup",(req,res)=>{
+app.post("/signup",async (req,res)=>{
     const{username,email,password}=req.body
 
-    //check if email already exists
-  const existingUser = users.find((user) => user.email === email);
-  if (existingUser) {
-    return res.status(400).json({ message: "Email already registered" });
-  }
+    try {
+    // 1. Check if email already exists
+    const existingUser = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
 
-  //add new user 
-  const newUser={username,email,password}
-  users.push(newUser)
-  res.status(201).json({message: "User created successfully",user:newUser})
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+
+    // 2. Insert new user if not exists
+    const result = await pool.query(
+      "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *",
+      [username, email, password]
+    );
+
+    res.status(201).json({ message:"New user signedup!",user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 })
 
 
