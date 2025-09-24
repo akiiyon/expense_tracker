@@ -1,3 +1,4 @@
+import 'package:expense_tracker/utils/api_service.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
 
@@ -8,9 +9,27 @@ class SigninScreen extends StatefulWidget {
 
 class _SigninScreenState extends State<SigninScreen> {
   //input controllers
-  final emailController = TextEditingController();
+  final _emailController = TextEditingController();
 
-  final passwordController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  final api = ApiService();
+
+  //handling sign in
+  Future<void> handleSignin() async {
+    final response = await api.signin(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    if (response.statusCode == 201) {
+      Navigator.pushNamed(context, AppRoutes.skeleton);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Signin failed : ${response.body}")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +98,7 @@ class _SigninScreenState extends State<SigninScreen> {
                     SizedBox(height: 30),
 
                     TextFormField(
-                      controller: emailController,
+                      controller: _emailController,
                       decoration: InputDecoration(
                         labelText: "Email",
                         hintText: "ex: akii@gmail.com",
@@ -95,7 +114,7 @@ class _SigninScreenState extends State<SigninScreen> {
                     SizedBox(height: 16),
                     TextFormField(
                       obscureText: true,
-                      controller: passwordController,
+                      controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: "Password",
                         border: OutlineInputBorder(
@@ -114,6 +133,7 @@ class _SigninScreenState extends State<SigninScreen> {
                       child: ElevatedButton(
                         onPressed: () {
                           //sign in
+                          handleSignin();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,

@@ -56,6 +56,47 @@ app.post("/signup",async (req,res)=>{
   }
 })
 
+//signin route
+app.post("/signin",async (req,res)=>{
+    const{email,password}=req.body
+
+    try {
+    // 1. Check if user exists
+    const user = await pool.query(
+      "SELECT * FROM users WHERE email = $1 AND password =$2",
+      [email,password]
+    );
+
+    if (user.rows.length == 0) {
+      return res.status(400).json({ error: "Invalid email or password" });
+    }
+
+    // 2. if found,send user back
+    
+
+    res.status(201).json({ message:"User logged in",user: user.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+})
+
+//add expense
+app.post('/addExpense',async (req,res)=>{
+  const{user_id, name, amount, category}=req.body
+
+  try {
+    const response=await pool.query(
+      "INSERT INTO expenses (user_id, name, amount, category) Values ($1, $2, $3) RETURNING*",
+      [user_id,name,amount,category]
+
+    )
+
+    res.status(201).json({message: "New expense added!",expense: response.rows[0]})
+  } catch (error) {
+    res.status(500).json({error: err.message});
+  }
+})
+
 
 app.listen(4000,()=>{
     console.log("server running on localhost:4000")
