@@ -1,11 +1,10 @@
 import 'dart:convert';
 
-import 'package:expense_tracker/screens/skeleton_screen.dart';
 import 'package:expense_tracker/utils/api_service.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:expense_tracker/model/user_provider.dart';
 
 class SignupScreen extends StatelessWidget {
   //input controllers
@@ -25,6 +24,15 @@ class SignupScreen extends StatelessWidget {
     );
 
     if (response.statusCode == 201) {
+      //decoding data so we can update userProvider
+      final data = jsonDecode(response.body);
+      final user = data["user"];
+
+      Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).setUser(user["id"], user["username"], user["email"]);
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("signup success!")));
@@ -183,6 +191,9 @@ class SignupScreen extends StatelessWidget {
                           } else {
                             //signup function -> call backend
                             handleSignup(context);
+
+                            //also add this to userProvider so we
+                            //can later access user name, userId
                           }
                         },
                         style: ElevatedButton.styleFrom(

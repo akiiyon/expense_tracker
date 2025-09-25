@@ -1,3 +1,4 @@
+import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -5,6 +6,13 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("ProfileScreen"));
+    return Center(
+      child: TextButton(
+        onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.signin);
+        },
+        child: const Text("ProfileScreen"),
+      ),
+    );
   }
 }

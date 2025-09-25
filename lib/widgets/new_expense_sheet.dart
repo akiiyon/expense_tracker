@@ -1,11 +1,16 @@
+import 'dart:collection';
+
 import 'package:expense_tracker/model/expense.dart';
 import 'package:expense_tracker/model/expense_provider.dart';
+import 'package:expense_tracker/utils/api_service.dart';
 import 'package:expense_tracker/widgets/category_list.dart';
 import 'package:expense_tracker/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+import 'package:expense_tracker/model/user_provider.dart';
 
 class NewExpenseSheet extends StatefulWidget {
   const NewExpenseSheet({super.key});
@@ -15,12 +20,35 @@ class NewExpenseSheet extends StatefulWidget {
 }
 
 class _NewExpenseSheetState extends State<NewExpenseSheet> {
- 
+  final api = ApiService();
+
   //* CONTROLLERS FOR INPUT *//
-  final expenseNameContoller=TextEditingController();
-  final expenseamountContoller=TextEditingController();
+  final expenseNameContoller = TextEditingController();
+  final expenseamountContoller = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  String? selectedCategory;
+  String selectedCategory = "";
+
+  //adding expense to backend
+  Future<void> handleNewExpense(double amount) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    final response = await api.addExpense(
+      userProvider.userId!,
+      amount,
+      selectedCategory,
+      _selectedDate,
+    );
+
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Expense saved to backend ✅")),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: ${response.body}")));
+    }
+  }
 
   @override
   void dispose() {
@@ -53,7 +81,7 @@ class _NewExpenseSheetState extends State<NewExpenseSheet> {
             CupertinoButton(
               child: Text("Done"),
               onPressed: () => Navigator.of(context).pop(),
-            )
+            ),
           ],
         ),
       ),
@@ -78,18 +106,17 @@ class _NewExpenseSheetState extends State<NewExpenseSheet> {
                 labelText: "Expense",
                 border: OutlineInputBorder(),
               ),
-              
             ),
             SizedBox(height: 10),
             //********EXPENSE AMOUNT********/
             TextFormField(
               controller: expenseamountContoller,
               inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly, // allow only digits
+                FilteringTextInputFormatter.digitsOnly, // allow only digits
               ],
               decoration: InputDecoration(
-              labelText: "Amount",
-              border: OutlineInputBorder(),
+                labelText: "Amount",
+                border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 10),
@@ -128,44 +155,56 @@ class _NewExpenseSheetState extends State<NewExpenseSheet> {
 
             /////****ADD NEW EXPENSE BUTTON****/////
             Center(
-              child: CupertinoButton
-              (child: Text("Add"),
-               onPressed: (){
-                //add new expense to list
-                final name = expenseNameContoller.text.trim();
-                final amountText = expenseamountContoller.text.trim();
+              child: CupertinoButton(
+                child: Text("Add"),
+                onPressed: () {
+                  //add new expense to list
+                  final name = expenseNameContoller.text.trim();
+                  final amountText = expenseamountContoller.text.trim();
 
-                if (name.isEmpty || amountText.isEmpty) {
-                  // show error (optional)
-                  ScaffoldMessenger.of(Navigator.of(context,rootNavigator:true).context,).showSnackBar(
-                    const SnackBar(content: Text("Please enter name and amount")),
+                  if (name.isEmpty || amountText.isEmpty) {
+                    // show error (optional)
+                    ScaffoldMessenger.of(
+                      Navigator.of(context, rootNavigator: true).context,
+                    ).showSnackBar(
+                      const SnackBar(
+                        content: Text("Please enter name and amount"),
+                      ),
+                    );
+                    return;
+                  }
+
+                  final amount = double.tryParse(amountText);
+                  if (amount == null) {
+                    ScaffoldMessenger.of(
+                      Navigator.of(context, rootNavigator: true).context,
+                    ).showSnackBar(
+                      const SnackBar(content: Text("Invalid amount")),
+                    );
+                    return;
+                  }
+                  // call backend
+                  handleNewExpense(amount);
+
+                  // create new Expense object
+                  final newExpense = Expense(
+                    name: name,
+                    amount: amount,
+                    category: selectedCategory ?? "Other",
+                    date: _selectedDate,
                   );
-                  return;
-                }
 
-                final amount = double.tryParse(amountText);
-                if (amount == null) {
-                  ScaffoldMessenger.of(Navigator.of(context,rootNavigator:true).context,).showSnackBar(
-                    const SnackBar(content: Text("Invalid amount")),
-                  );
-                  return;
-                }
+                  // add to provider
+                  Provider.of<ExpenseProvider>(
+                    context,
+                    listen: false,
+                  ).addExpense(newExpense);
 
-                // create new Expense object
-                final newExpense = Expense(
-                  name: name,
-                  amount: amount,
-                  category: selectedCategory??"Other",
-                  date: _selectedDate,
-                );
-
-                // add to provider
-                Provider.of<ExpenseProvider>(context, listen: false)
-                    .addExpense(newExpense);
-
-                print("Expense Added: $name - ₹$amount");
-                              Navigator.pop(context);
-                }))
+                  print("Expense Added: $name - ₹$amount");
+                  Navigator.pop(context);
+                },
+              ),
+            ),
           ],
         ),
       ),

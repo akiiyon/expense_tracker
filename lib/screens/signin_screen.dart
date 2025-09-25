@@ -1,6 +1,11 @@
+import 'dart:convert';
+
+import 'package:expense_tracker/model/user_provider.dart';
 import 'package:expense_tracker/utils/api_service.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/model/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class SigninScreen extends StatefulWidget {
   @override
@@ -17,12 +22,22 @@ class _SigninScreenState extends State<SigninScreen> {
 
   //handling sign in
   Future<void> handleSignin() async {
+    //add details of user to userProvider
+
     final response = await api.signin(
       _emailController.text,
       _passwordController.text,
     );
 
     if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      final user = data["user"];
+
+      Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).setUser(user["id"], user["username"], user["email"]);
+
       Navigator.pushNamed(context, AppRoutes.skeleton);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

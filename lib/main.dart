@@ -1,4 +1,6 @@
 import 'package:expense_tracker/model/expense_provider.dart';
+import 'package:expense_tracker/model/user_provider.dart';
+import 'package:expense_tracker/screens/signUp_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'utils/route.dart';
@@ -12,12 +14,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ExpenseProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ExpenseProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
       child: MaterialApp(
         title: "Expense Tracker",
         // home: SignupScreen(),
-        initialRoute: AppRoutes.signin,
+        initialRoute: AppRoutes.signup,
         routes: AppRoutes().routes,
       ),
     );

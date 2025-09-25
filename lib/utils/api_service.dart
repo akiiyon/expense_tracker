@@ -38,23 +38,24 @@ class ApiService {
     return response;
   }
 
+  //add New Expense
   Future<http.Response> addExpense(
     int userId,
-    String username,
     double amount,
     String category,
+    DateTime expenseDate,
   ) async {
     final url = Uri.parse("$baseUrl/addExpense");
 
     final response = await http.post(
       url,
-      headers: {"Conten-Type": "application/json"},
-      body: {
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
         "user_id": userId,
-        "username": username,
         "amount": amount,
         "category": category,
-      },
+        "expense_date": expenseDate.toIso8601String(),
+      }),
     );
 
     if (response.statusCode == 201) {

@@ -82,18 +82,18 @@ app.post("/signin",async (req,res)=>{
 
 //add expense
 app.post('/addExpense',async (req,res)=>{
-  const{user_id, name, amount, category}=req.body
+  const{user_id, amount, category, expense_date}=req.body
 
   try {
     const response=await pool.query(
-      "INSERT INTO expenses (user_id, name, amount, category) Values ($1, $2, $3) RETURNING*",
-      [user_id,name,amount,category]
+      "INSERT INTO expenses (user_id, amount, category, expense_date) VALUES ($1, $2, $3, $4) RETURNING*",
+      [user_id,amount,category,expense_date]
 
     )
 
     res.status(201).json({message: "New expense added!",expense: response.rows[0]})
   } catch (error) {
-    res.status(500).json({error: err.message});
+    res.status(500).json({error: error.message});
   }
 })
 
