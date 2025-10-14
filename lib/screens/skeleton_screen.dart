@@ -1,3 +1,4 @@
+import 'package:expense_tracker/model/user_provider.dart';
 import 'package:expense_tracker/screens/profile_screen.dart';
 import 'package:expense_tracker/screens/report_screen.dart';
 import 'package:expense_tracker/screens/transaction_screen.dart';
@@ -10,16 +11,19 @@ class SkeletonScreen extends StatefulWidget {
 
 class _SkeletonScreenState extends State<SkeletonScreen> {
   //selectedScreenIndex
-  int _selectedScreen=0;
+  int _selectedScreen = 0;
 
   //list of all screens
-  List<Widget> _screens=[TransactionScreen(),ReportScreen(),ProfileScreen()];
+  List<Widget> _screens = [
+    TransactionScreen(),
+    ReportScreen(),
+    ProfileScreen(),
+  ];
 
-  void onTapped(int presentScreenIndex){
+  void onTapped(int presentScreenIndex) {
     setState(() {
-      _selectedScreen=presentScreenIndex;
+      _selectedScreen = presentScreenIndex;
     });
-    
   }
 
   @override
@@ -29,18 +33,16 @@ class _SkeletonScreenState extends State<SkeletonScreen> {
       body: _screens.elementAt(_selectedScreen),
       //bottom navigation
       bottomNavigationBar: BottomNavigationBar(
-        //navigation bar items will represent our screens, they switch the body of our app on tap! 
+        //navigation bar items will represent our screens, they switch the body of our app on tap!
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home),label: "home"),
-          BottomNavigationBarItem(icon: Icon(Icons.report),label:"report"),
-          BottomNavigationBarItem(icon: Icon(Icons.people),label: "profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "home"),
+          BottomNavigationBarItem(icon: Icon(Icons.report), label: "report"),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: "profile"),
         ],
         currentIndex: _selectedScreen,
         selectedItemColor: Colors.green,
-        onTap: onTapped,),
-      
-
+        onTap: onTapped,
+      ),
     );
-
   }
 }

@@ -36,7 +36,7 @@ app.post("/signup",async (req,res)=>{
     try {
     // 1. Check if email already exists
     const existingUser = await pool.query(
-      "SELECT * FROM users WHERE email = $1",
+      "SELECT id, username, email, balance FROM users WHERE email = $1",
       [email]
     );
 
@@ -46,7 +46,7 @@ app.post("/signup",async (req,res)=>{
 
     // 2. Insert new user if not exists
     const result = await pool.query(
-      "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *",
+      "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email, balance",
       [username, email, password]
     );
 
@@ -91,11 +91,58 @@ app.post('/addExpense',async (req,res)=>{
 
     )
 
-    res.status(201).json({message: "New expense added!",expense: response.rows[0]})
+    //also update user's balance in user table by subtracting the expense
+    const walltetBalance=await pool.query(
+      "UPDATE users SET balance = balance -$1 WHERE id =$2 RETURNING balance",
+      [amount,user_id]
+    )
+
+    res.status(201).json({message: "New expense added! & balance updated",expense: response.rows[0],balance:walltetBalance.rows[0].balance})
   } catch (error) {
     res.status(500).json({error: error.message});
   }
 })
+
+//add money to wallet (update user's balance)
+
+app.post('/credit',async (req,res)=>{
+  const {user_id,balance}=req.body
+
+  try {
+    const response =await pool.query(
+    "UPDATE users SET balance = balance + $2 WHERE id = $1 RETURNING *",
+    [user_id,balance]
+  )
+
+  if(response.rows.length==0){
+    return res.status(404).json({ error: "User not found" })
+  }
+  res.status(200).json({
+      message: "Balance credited successfully",
+      user: response.rows[0],
+    });
+  } catch (error) {
+    console.error("Error crediting balance:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+})
+
+//get past week expenses
+app.get("/expenses/week/:user_id",async (req,res)=>{
+  const{user_id}=req.params;
+
+  try {
+    const result = await pool.query(
+      "SELECT category, SUM(amount) :: float AS total FROM expenses WHERE user_id =$1 AND expense_date>=NOW() - INTERVAL '7 days' GROUP BY category ORDER BY category",
+      [user_id]
+    )
+
+    res.status(200).json(result.rows)
+  } catch (error) {
+    res.status(500).json({error: error.message})
+  }
+})
+
 
 
 app.listen(4000,()=>{

@@ -31,7 +31,7 @@ class SignupScreen extends StatelessWidget {
       Provider.of<UserProvider>(
         context,
         listen: false,
-      ).setUser(user["id"], user["username"], user["email"]);
+      ).setUser(user["id"], user["username"], user["email"],(user['balance'] as num).toDouble());
 
       ScaffoldMessenger.of(
         context,

@@ -1,15 +1,38 @@
-
+import 'package:expense_tracker/model/user_provider.dart';
+import 'package:expense_tracker/utils/api_service.dart';
 import 'package:expense_tracker/utils/route.dart';
 import 'package:expense_tracker/widgets/expense_list.dart';
 import 'package:expense_tracker/widgets/new_expense_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/widgets/text_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:expense_tracker/model/expense_provider.dart';
+
 
 class TransactionScreen extends StatelessWidget {
-
+  final api = ApiService();
   @override
+  void handleWalletUpdate(BuildContext context, double amountToAdd) async {
+    final userProvider = context.read<UserProvider>();
+
+    try {
+      final response = await api.credit(userProvider.userId!, amountToAdd);
+
+      if (response.statusCode == 200) {
+        // Only update local state if API succeeds
+        userProvider.updateBalance(amountToAdd);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("$amountToAdd added to wallet")));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to add money to wallet")),
+        );
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -23,49 +46,68 @@ class TransactionScreen extends StatelessWidget {
             builder: (context) => NewExpenseSheet(), // your add expense widget
           );
         },
-        icon: const Icon(Icons.add,color: Colors.black),
-        label: const Text("Add Expense",style: TextStyle(color: Colors.black),),
+        icon: const Icon(Icons.add, color: Colors.black),
+        label: const Text("Add Expense", style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.amber.shade500,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-     
+
       body: SafeArea(
-         
         child: Column(
-      
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 12.0),
               child: ListTile(
-                title: MainTextWidget( inputText: 'Hi, Akshay', x: 20,),
-                subtitle: SubTextWidget(inputText: 'Welcome Back!', x: 14,),
+                title: MainTextWidget(inputText: 'Hi, Akshay', x: 20),
+                subtitle: SubTextWidget(inputText: 'Welcome Back!', x: 14),
                 trailing: Icon(Icons.notifications_active),
               ),
             ),
-            SizedBox(height: 12,),
-             // Wallet Balance (listens to provider)
-            Consumer<ExpenseProvider>(
-              builder: (context, expenseProvider, child) {
+            SizedBox(height: 12),
+            // Wallet Balance (listens to provider)
+            Consumer<UserProvider>(
+              builder: (context, userProvider, child) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:8.0,vertical:16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 16,
+                  ),
                   child: Card(
                     color: Colors.green,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.all(Radius.circular(16)),
+                      borderRadius: BorderRadiusGeometry.all(
+                        Radius.circular(16),
+                      ),
                     ),
                     elevation: 6,
                     child: ListTile(
-                      
-                      title: Text('Wallet Balance', style: TextStyle(fontSize: 14,color: Colors.white),),
+                      title: Text(
+                        'Wallet Balance',
+                        style: TextStyle(fontSize: 14, color: Colors.white),
+                      ),
                       subtitle: Row(
                         children: [
-                          const Text("₹",style: TextStyle(fontSize: 16,color: Colors.white),),
-                          const SizedBox(width: 5,),
+                          const Text(
+                            "₹",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                          const SizedBox(width: 5),
                           Text(
-                                '${expenseProvider.walletBalance.toStringAsFixed(2)}',
-                                style: TextStyle(fontWeight: FontWeight.bold,fontSize:36,color: Colors.white ),
+                            '${userProvider.walletBalance.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 36,
+                              color: Colors.white,
+                            ),
                           ),
                         ],
+                      ),
+                      trailing: ElevatedButton(
+                        style: ElevatedButton.styleFrom(shape: CircleBorder()),
+                        onPressed: () {
+                          handleWalletUpdate(context, 10000);
+                        },
+                        child: Icon(Icons.add, size: 20),
                       ),
                     ),
                   ),
@@ -73,24 +115,28 @@ class TransactionScreen extends StatelessWidget {
               },
             ),
 
-            SizedBox(height: 16,),
-            
-            
+            SizedBox(height: 16),
+
             //recent-activity buttons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Recent",style: TextStyle(color: Colors.grey.shade700,fontSize: 16,fontWeight: FontWeight.bold),),
+                  Text(
+                    "Recent",
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   TextButton(
-                    onPressed: (){
+                    onPressed: () {
                       //show a page of all expenses in list format
                       Navigator.pushNamed(context, AppRoutes.details);
-                    }, 
-                    style: ButtonStyle(
-                      
-                    ),
+                    },
+                    style: ButtonStyle(),
                     child: Text(
                       "See details>",
                       style: TextStyle(color: Colors.black),
@@ -104,42 +150,22 @@ class TransactionScreen extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.green.shade400,
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(16),topRight: Radius.circular(16))
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
                 ),
-                
+
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ExpenseList(),
-                )),
+                ),
+              ),
             ),
-           
           ],
         ),
       ),
-      
     );
   }
 }
 
-// Container(
-//               margin: EdgeInsets.symmetric(horizontal: 46),
-              
-//               child: FloatingActionButton(
-//                 onPressed: (){
-//                   //add new expense function
-//                   showModalBottomSheet(
-//                     context: context,
-//                     builder: (BuildContext bottomSheetcontext){
-//                       return NewExpenseSheet();
-//                     });
-//                 },
-//                 child: Text(
-//                   "Add Expense",
-//                   style: TextStyle(
-//                     color: Colors.white,
-//                     fontSize: 20,
-//                     fontWeight: FontWeight.bold
-//                     ),
-//                 ),
-//               ),    
-//             ),

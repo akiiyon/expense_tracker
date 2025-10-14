@@ -22,7 +22,6 @@ class _SigninScreenState extends State<SigninScreen> {
 
   //handling sign in
   Future<void> handleSignin() async {
-    //add details of user to userProvider
 
     final response = await api.signin(
       _emailController.text,
@@ -36,7 +35,7 @@ class _SigninScreenState extends State<SigninScreen> {
       Provider.of<UserProvider>(
         context,
         listen: false,
-      ).setUser(user["id"], user["username"], user["email"]);
+      ).setUser(user["id"], user["username"], user["email"],(user['balance']as num).toDouble());
 
       Navigator.pushNamed(context, AppRoutes.skeleton);
     } else {

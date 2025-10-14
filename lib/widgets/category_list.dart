@@ -13,11 +13,11 @@ class _CategoryListState extends State<CategoryList> {
 
   final List<String> _categories = [
     "Rent",
-    "Bill",
     "Food",
     "Grocery",
     "Entertainment",
-    "Other"
+    "Commute",
+    "Other",
   ];
 
   @override

@@ -1,4 +1,4 @@
-import 'dart:collection';
+import 'dart:convert';
 
 import 'package:expense_tracker/model/expense.dart';
 import 'package:expense_tracker/model/expense_provider.dart';
@@ -40,6 +40,11 @@ class _NewExpenseSheetState extends State<NewExpenseSheet> {
     );
 
     if (response.statusCode == 201) {
+      final data = jsonDecode(response.body);
+      // update balance in provider
+      // final newBalance = (data['balance'] as num).toDouble();
+      // userProvider.updateBalance(newBalance);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Expense saved to backend ✅")),
       );
@@ -190,16 +195,21 @@ class _NewExpenseSheetState extends State<NewExpenseSheet> {
                   final newExpense = Expense(
                     name: name,
                     amount: amount,
-                    category: selectedCategory ?? "Other",
+                    category: selectedCategory,
                     date: _selectedDate,
                   );
 
-                  // add to provider
+                  // add to Expenseprovider
                   Provider.of<ExpenseProvider>(
                     context,
                     listen: false,
                   ).addExpense(newExpense);
 
+                  //update walletBalance in userProvider
+                  Provider.of<UserProvider>(
+                    context,
+                    listen: false,
+                  ).spend(amount);
                   print("Expense Added: $name - ₹$amount");
                   Navigator.pop(context);
                 },
