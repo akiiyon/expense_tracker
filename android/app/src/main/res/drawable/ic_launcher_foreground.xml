@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- coin ring with a gap at the top right -->
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="5.5" android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M73.32,48.82 A20,20 0 1,1 59.18,34.68" />
+    <!-- growth bars -->
+    <path android:fillColor="#FFFFFF" android:pathData="M43,62 L48,62 L48,56.5 A2.5,2.5 0 0,0 43,56.5 Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M51.5,62 L56.5,62 L56.5,52 A2.5,2.5 0 0,0 51.5,52 Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M60,62 L65,62 L65,47.5 A2.5,2.5 0 0,0 60,47.5 Z" />
+    <!-- xp spark -->
+    <path android:fillColor="#FFB547" android:pathData="M68.14,36.06 A3.8,3.8 0 1,1 68.14,43.66 A3.8,3.8 0 1,1 68.14,36.06 Z" />
+</vector>
